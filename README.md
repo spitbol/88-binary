@@ -1,6 +1,7 @@
 # SPITBOL-88
 
-The file SPIT88.ZIP contains the files as shipped in the 1990's.
+The file SPIT88.ZIP contains the files as shipped in the 1990's by Mark Emmer of Catspaw,Inc.
+
 The remaining files in this distribution are the files contained
 in SPIT88.ZIP with licensing information attached, using
 a BSD-style license contained in the file LICENSE.
@@ -63,10 +64,11 @@ SPITBOL-88 uses a small memory model that provides approximately
 56 KB of workspace (for compiled program and data). Default 
 memory values are:
 
-|:Name              |:8088 version |:80386 version|
-|&MAXLNGTH          |9,000 bytes   | 4 megabytes
-|Workspace          |56 kilobytes  |64 megabytes
-|Stack              |2,812 bytes   |32 kilobytes
+|Name               |8088 version  |80386 version|
+|:------------------|-------------:|------------:|
+|&MAXLNGTH          |9,000 bytes   | 4 megabytes |
+|Workspace          |56 kilobytes  |64 megabytes |
+|Stack              |2,812 bytes   |32 kilobytes |
 
 The initial stack and &MAXLNGTH values can be adjusted from the 
 command line, subject to the overall limitations provided by the 
@@ -104,12 +106,13 @@ the SET argument forms of Dewar's PC-SPITBOL. This is essential
 for SPITBOLS, because there is no other way to set file positions 
 larger than 32,767. Specifically, the forms supported are:
 
-|:Call                     |:Position |
-|SET(file, 'P', m)         | Position to file offset m.
-|SET(file, 'H', m)         | Position to m*32768 + (current position mod 32768).|
-|SET(file, 'R', m)         | Position to current position plus or minus m.| 
-|SET(file, 'C', m)         | Change record length of binary file to m.|
-|SET(file, 'D')            | Delete record is not supported.|
+|Call                     |Position |
+|:------------------------|:--------|
+|SET(file, 'P', m)        |Position to file offset m. |
+|SET(file, 'H', m)        |Position to m*32768 + (current position mod 32768).|
+|SET(file, 'R', m)        |Position to current position plus or minus m.| 
+|SET(file, 'C', m)        |Change record length of binary file to m.|
+|SET(file, 'D')           |Delete record is not supported.|
 
 While these new SET functions are now available in all versions 
 of Catspaw SPITBOL, they are not needed in any of the 32-bit 
@@ -121,11 +124,12 @@ SPITBOL-88 provides identical HOST functions (including screen,
 keyboard, and BIOS calls) to SPITBOL-386. The numbering of some 
 host functions differ between Dewar's PC-SPITBOL and SPITBOL-88:
 
-|:Function                      |:PC-SPITBOL    |:SPITBOL-88|
-|Obtain parameter string        |HOST(1)        | HOST(0)|
-|Obtain Shell variable          |HOST(2, S)     | HOST(4, S)|
-|Sound note                     |HOST(3, I1, I2)| HOST(200, I1, I2)|
-|Play string                    |HOST(4, S)     | HOST(201, S)|
+|Function                      |PC-SPITBOL    |SPITBOL-88|
+|:-----------------------------|:-------------|:---------|
+|Obtain parameter string       |HOST(1)       | HOST(0)|
+|Obtain Shell variable         |HOST(2, S)    | HOST(4, S)|
+|Sound note                    |HOST(3, I1, I2)| HOST(200, I1, I2)|
+|Play string                   |HOST(4, S)    | HOST(201, S)|
 
 The include files PCHOST.INC and HOST.INC provide two different 
 version-independent ways of accessing these functions.
