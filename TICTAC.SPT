@@ -1,0 +1,150 @@
+*	(c) COPYRIGHT 1985, 1994 - CATSPAW, INCORPORATED
+*	ALL RIGHTS RESERVED.
+*	USE OF THIS SOURCE CODE IS GOVERNED BY A BSD-STYLE
+*	LICENSE THAT CAN BE FOUND IN THE LICENSE FILE.
+
+*	This program plays a rudimentary game of TIC-TAC-TOE.
+*
+*	Although the strategy is not elaborate, it illustrates
+*	how pattern matching can be used to analyse board positions.
+*
+*	The board is represented by a nine-character string.  Each string
+*	position may contain an "X" (player), "O" (program), or "." (vacant).
+*
+*	The correspondence between character position and the board is:
+*
+*		0 | 1 | 2
+*		---------
+*		3 | 4 | 5
+*		---------
+*		6 | 7 | 8
+*
+*
+*	From STRING AND LIST PROCESSING IN SNOBOL4 by Ralph E. Griswold,
+*			 by permission of the author.
+*	----------------------------------------------------------------
+*
+*
+*********************************************************************
+*                            INITIALIZATION                         *
+*********************************************************************
+	&TRIM	=	1
+	DEFINE("COL(C1,C2,C3)")
+	DEFINE("DIAG(C1,C2,C3)")
+	DEFINE("ROW(C1,C2,C3)")
+	DEFINE("TWO(M)")
+	UC	=	'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	LC	=	'abcdefghijklmnopqrstuvwxyz'
+	SKIP	=	NULL . OUTPUT
+	ROW	=	LEN(3) . OUTPUT
+	PRINT	=	SKIP ROW ROW ROW SKIP
+*********************************************************************
+*                            BOARD PATTERNS                         *
+*********************************************************************
+*	Columns start at character positions 0, 1, and 2:
+	C	=	TAB(0) | TAB(1) | TAB(2)
+
+*	Rows start at character positions 0, 3, and 6:
+	R	=	TAB(0) | TAB(3) | TAB(6)
+
+*	Assign scanner position to M, then see if the next square is free:
+	F	=	@M "."
+
+*	Pattern to take a vacant square at position M:
+	P	=	POS(*M) "."
+
+*	Pattern to determine if the center square is free.  Set M = 4 if so.
+	CENTER	=	TAB(4) F
+
+*	Pattern to see if any corner is free, set M = corner if so.
+	CORNER	=	(TAB(0) | TAB(2) | TAB(6) | TAB(8)) F
+
+*	SNOBOL4 can win if there are two O's and a free square in a line:
+	WIN	=	TWO("O")
+
+*	SNOBOL4 must block user if two X's and a free square in a line:
+	BLOCK	=	TWO("X")
+
+*	SNOBOL4 loses if row, column, or diagonal of 3 X's:
+	LOSE	=	ROW("X","X","X") | COL("X","X","X") |
++			DIAG("X","X","X")
+
+*	Block if necessary, else seize corner, else any take first free square:
+	PLAY	=	BLOCK | CORNER | F
+
+*********************************************************************
+*                            INTRODUCTION                           *
+*********************************************************************
+	OUTPUT	=	"This program plays TIC-TAC-TOE.  Your mark is"
++			" X and you will play first."
+	OUTPUT	=	"The board is numbered as follows:"
+	"012345678" ? PRINT
+	OUTPUT	=	"When it is your turn to play, type the number"
++			" of the square you wish to mark."
+	OUTPUT	=	"For example, if you type '4', the result is:"
+	"....X...." ? PRINT
+	OUTPUT	=	"Any time it is your turn to play, you may"
++			" start a new game by typing 'N'"
+	OUTPUT	=	"or end the session by typing 'Q'"
+*********************************************************************
+*                            GAME PLAY                              *
+*********************************************************************
+START	OUTPUT	=	DUPL("-",10)
+	OUTPUT	=	"NEW GAME"
+	BOARD	=	DUPL(".",9)
+
+NEXT	OUTPUT	=	"Your play"
+	M	=	REPLACE(INPUT,LC,UC)			:F(ABAND)
+	IDENT(M,"N")						:S(START)
+	IDENT(M,"Q")						:S(STOP)
+	INTEGER(M)						:F(ERROR)
+
+*	Make move for user:
+	BOARD ? P	=	"X"				:F(ERROR)
+
+*	Try to seize the center:
+	BOARD ? CENTER						:S(MINE)
+
+*	Check if we lost:
+	BOARD ? LOSE						:S(LOSE)
+
+*	Check if we won:
+	BOARD ? WIN						:S(WIN)
+
+*	Neither.  Select our next move:
+	BOARD ? PLAY						:F(TIE)
+
+*	Make our move into position M.
+MINE	BOARD ? P	=	"O"
+	BOARD ? PRINT						:(NEXT)
+
+LOSE	OUTPUT	=	"You win"				:(NEW)
+
+TIE	OUTPUT	=	"Tie game"				:(NEW)
+
+WIN	BOARD	P	=	"O"
+	OUTPUT	=	"I win"
+
+NEW	BOARD ? PRINT						:(START)
+ABAND	OUTPUT	=	'Session abandoned'			:(END)
+STOP	OUTPUT	=	'Session ended'				:(END)
+ERROR	OUTPUT	=	'Erroneous move - try again' 		:(NEXT)
+*********************************************************************
+*                            FUNCTION DEFINITIONS                   *
+*********************************************************************
+
+* Function returns pattern to check for C1, C2, C3 adjacent in any column.
+COL	COL	=	C C1 LEN(2) C2 LEN(2) C3		:(RETURN)
+
+* Function returns pattern to check for C1, C2, C3 adjacent in any diagonal.
+DIAG	DIAG	=	TAB(0) C1 TAB(4) C2 TAB(8) C3 |
++			TAB(2) C1 TAB(4) C2 TAB(6) C3		:(RETURN)
+
+* Function returns pattern to check for C1, C2, C3 adjacent in any row.
+ROW	ROW	=	R C1 C2 C3				:(RETURN)
+
+* Function returns pattern to check for two marks (M) and a vacant square:
+TWO	TWO	=	ROW(F,M,M) | ROW(M,F,M) | ROW(M,M,F) |
++			COL(F,M,M) | COL(M,F,M) | COL(M,M,F) |
++			DIAG(F,M,M) | DIAG(M,F,M) | DIAG(M,M,F)	:(RETURN)
+END

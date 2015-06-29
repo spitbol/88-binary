@@ -1,0 +1,5 @@
+<element>::=a|b|c|d
+<member>::=<element>|<ntuple>
+<list>::=<member>|<member>,<list>
+<ntuple>::=(<list>)
+<ntuple>

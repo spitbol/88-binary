@@ -1,0 +1,59 @@
+*	A 'Property String' is a string in which there is a correspondence
+*	between positive integers and character position.  The characters
+*	'X' and 'O' denote whether or not the corresponding integer has
+*	a particular property.
+*
+*	For example, the property string of prime numbers begins with:
+*		XXXOXOXOOOXOXOOOX...
+*	corresponding to the integers 1,2,3,5,7,11,13,17,...
+*
+*	They provide an interesting way to represent data, and can be
+*	used to search for patterns in the property set.
+*
+*	By way of extension, the logical OR function in the LOGIC.COM
+*	package could be used to encode up to eight different properties
+*	in each character position.
+*
+*	Here are a number of routines to manipulate property strings.
+*
+*	Adapted from STRING AND LIST PROCESSING IN SNOBOL4 by Ralph E. Griswold,
+*			 by permission of the author.
+*	------------------------------------------------------------------------
+*
+*
+*	Function to print the positions of interest in a property string.
+*	This version illustrates a recursive pattern, FIND.
+	DEFINE('PRPPOS(S)')
+	FIND	=	BREAK("X") LEN(1) @OUTPUT *FIND
+	DISPLAY	=	POS(0) FIND				:(PRPPOS_END)
+PRPPOS	S ? DISPLAY						:(RETURN)
+PRPPOS_END
+
+
+*	Function to print the distance between interesting positions in a
+*	property string.  It illustrates calling a function within a pattern.
+*
+	DEFINE('PRPDIST(S)')
+	DISTANCE	=	POS(0) BREAK("X") LEN(1) @OUTPUT
+								:(PRPDIST_END)
+PRPDIST	S ? DISTANCE	=					:S(PRPDIST)F(RETURN)
+PRPDIST_END
+
+*	Test Program to create a property string of the palindromic numbers
+*	among the first 150 squares, and to apply the previous two functions
+*	to it.
+*
+	DEFINE("PALMRK(N)")
+	N	=	0
+PALOOP	N	=	LT(N,150) N + 1				:F(DONE)
+	PALSTR	=	PALSTR PALMRK(N * N)			:(PALOOP)
+DONE	OUTPUT	=	"Palindrome property string = " PALSTR
+	OUTPUT	=	"Palindrome positions:"
+	PRPPOS(PALSTR)
+	OUTPUT	=	"Palindrome distances:"
+	PRPDIST(PALSTR)						:(END)
+
+PALMRK	N	=	CONVERT(N,"STRING")
+	PALMRK	=	IDENT(N,REVERSE(N)) "X"			:S(RETURN)
+	PALMRK	=	"O"					:(RETURN)
+END

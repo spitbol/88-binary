@@ -1,0 +1,33 @@
+* (c) COPYRIGHT 1985, 1994 - CATSPAW, INCORPORATED
+* ALL RIGHTS RESERVED.
+* USE OF THIS SOURCE CODE IS GOVERNED BY A BSD-STYLE
+* LICENSE THAT CAN BE FOUND IN THE LICENSE FILE.
+
+* TEST.SPT - Test 8088 SPITBOL.
+*
+* This program provides a very quick and rudimentary test to see
+* if SPITBOL is running properly on the user's particular hardware.
+*
+	TERMINAL =
+	TERMINAL = "      Test SPITBOL installation"
+	TERMINAL = "      -------------------------"
+	TERMINAL =
+	S = "not ok!"
+	X = 500
+	Y = 20
+	TERMINAL = "Test integer math, should produce 250:   "
++		((X + Y) * 10) / Y - 10
+	X = CONVERT(X,"REAL")
+	TERMINAL = "Test real math, should produce 250.:   "
++		((X + Y) * 7.5) / Y + 55.0
+	TERMINAL = "Test trig functions, should produce 1.:  "
++		SQRT(SIN(0.25) ** 2 + COS(0.25) ** 2)
+	TERMINAL = "Test pattern matching, should produce OK!:   "
++	(S ? FENCE BREAKX("o") "ok" = "OK")
+	TERMINAL = "Test memory allocation---"
+	A = ARRAY(2500)
+	TERMINAL = "      Allocation succeeded"
+	TERMINAL =
+	TERMINAL = "This concludes this simple test of SPITBOL installation."
+	TERMINAL = "Everything appears to be in order."
+END

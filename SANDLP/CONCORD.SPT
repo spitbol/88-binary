@@ -1,0 +1,58 @@
+*	Program to produce a concordance of all words in the INPUT file.
+*	A word is simplistically defined as a string of alphabetic characters,
+*	and hyphen and single quote.
+*	Characters are converted to upper case.
+*
+*	Sample usage:
+*		spitbol concord <faustus
+*
+*	Adapted from STRING AND LIST PROCESSING IN SNOBOL4 by Ralph E. Griswold,
+*		 	 by permission of the author.
+*	------------------------------------------------------------------------
+*
+
+*	Get next word from input file.  Fail on EOF.
+*
+	DEFINE("GET()")
+	UPPERS	=	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	LOWERS	=	"abcdefghijklmnopqrstuvwxyz"
+	LETTERS	=	UPPERS "-'"
+	WORD	=	BREAK(LETTERS) SPAN(LETTERS) . GET	:(GET_END)
+
+GET	LINE ? WORD	=					:S(RETURN)
+	LINE.NO	=	LINE.NO + 1
+	LINE	=	INPUT					:F(FRETURN)
+	OUTPUT	=	LINE.NO ' ' LINE
+	LINE	=	REPLACE(LINE,LOWERS,UPPERS)		:(GET)
+GET_END
+
+*	Record line number citation of word.
+*
+	DEFINE("CITE(WORD,N,TABLE)")				:(CITE_END)
+
+CITE	TABLE[WORD]	=	TABLE[WORD] N ","		:(RETURN)
+CITE_END
+
+*	Print concordance results.
+*
+	DEFINE("PRINT(A)I")					:(PRINT_END)
+
+PRINT	I	=	I + 1
+	OUTPUT	=	A[I,1] " : " A[I,2]			:S(PRINT)F(RETURN)
+PRINT_END
+
+*	Main program starts here.
+*
+	LINE.NO	=	0
+	T	=	TABLE(1000)
+	&TRIM	=	1
+
+	OUTPUT	=	"Listing of text";	OUTPUT	=
+
+NEXT	CITE(GET(),LINE.NO,T)					:S(NEXT)
+	OUTPUT	=
+	A	=	SORT(T)					:F(NONE)
+	OUTPUT	=	"Concordance";	OUTPUT	=
+	PRINT(A)						:S(END)
+NONE	OUTPUT	=	"No citations"				:(END)
+END

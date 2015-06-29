@@ -1,0 +1,92 @@
+*	Program BNF.spt
+*
+*	This program reads a series of definitions which comprise
+*	a formal grammar.  Sample statement lines are then input, and
+*	tested to see if they are legal for the defined grammar.
+*
+*	The grammar format used is Backus-Naur Form (BNF).  Briefly,
+*	TERMINALs are the characters from which language elements are created,
+*	and NONTERMINALs are the structures and elements of interest.  In the
+*	following, NONTERMINALs are enclosed in angle brackets, the string
+*	'::=' is used to define a NONTERMINAL, and vertical bar defines
+*	alternative choices.  The GOAL is the structure against which sample
+*	lines are tested.
+*
+*	The method used is to convert the BNF definitions to SNOBOL4 patterns.
+*	Note that more efficient forms could be used if BNF was extended to
+*	allow SNOBOL4 primitives, such as ANY(LETTER) instead of 'A' | 'B' | ...
+*
+*	The grammar definitions are read from the file Grammer.def, and
+*	the sample lines are read from Grammar.in.
+*
+*	From STRING AND LIST PROCESSING IN SNOBOL4 by Ralph E. Griswold,
+*			 by permission of the author.
+*	----------------------------------------------------------------
+*
+	&trim	=	1
+	&anchor	=	1
+	&case	=	0
+	quote	=	"'"
+
+* Pattern to break apart a non-terminal definition line:
+	defpat	=	'<' break('>') . name '>::=' rem . def
+
+* Pattern to break apart alternatives within a definition:
+	altpat	=	break('|') . alt len(1) | (len(1) rem) . alt
+
+* Pattern to examine sub-pattern within an alternative.  There are three forms:
+*	<NONTERMINAL>
+*	TERMINAL <NONTERMINAL>
+* 	TERMINAL TERMINAL
+*
+*   Note the use of the cursor operator to assign P the value 1 if SUB is a
+*    NONTERMINAL, and 0 if it is a TERMINAL.
+*
+	subpat	=	'<' @p break('>') . sub '>' |
++			@p (len(1) break('<')) . sub | @p (len(1) rem) . sub
+
+* The goal is a NONTERMINAL without a definition:
+	goal	=	'<' break('>') . name
+
+	input(.grammar, 2, 'grammar.def')			:s(nextl)
+	output	=	'Cannot open file grammar.def'		:(end)
+
+nextl	line	=	grammar					:f(error)
+	line ? defpat						:f(test)
+	output	=	line
+
+* Initialize variable to accumulate the current definition.
+	pattern	=
+
+* Get next alternative from definition, accumulate a next alternative.
+nexta	def ? altpat	=					:f(eod)
+	pattern		=	differ(pattern) pattern ' |'
+
+* Get next subpattern for this alternative
+nexts	alt ? subpat	=					:f(nexta)
+
+* If it's a nonterminal, use unevaluated expression operator:
+	pattern	=	gt(p,0) pattern ' *' sub		:s(nexts)
+
+* Otherwise it's a terminal, put it in quotes:
+	pattern	=	pattern ' ' quote sub quote		:(nexts)
+
+* No more alternatives, define this NONTERMINAL:
+eod	$name	=	eval(pattern)				:(nextl)
+
+* Line with no definition, it must be the GOAL:
+test	line ? goal
+	pattern	=	pos(0) $name rpos(0)
+	endfile(2)
+
+	input(.test, 1, 'grammar.in')				:s(testt)
+	output	=	'Cannot open file grammar.in'		:(end)
+
+* Now read sample lines from the input file, and test them.
+testt	string	=	test					:f(end)
+	output	=
+	output	=	string
+	string ? pattern					:f(no)
+	output	=	'is a ' name				:(testt)
+no	output	=	'is not a ' name			:(testt)
+end

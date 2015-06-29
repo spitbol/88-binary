@@ -1,0 +1,14 @@
+* (c) COPYRIGHT 1985, 1994 - CATSPAW, INCORPORATED
+* ALL RIGHTS RESERVED.
+* USE OF THIS SOURCE CODE IS GOVERNED BY A BSD-STYLE
+* LICENSE THAT CAN BE FOUND IN THE LICENSE FILE.
+
+* Test real return and arithmetic from external function.
+*
+* Should write 999.0 to terminal.
+*
+	load("testef3(integer,real,string)")		:s(loads_ok)
+	terminal = "Can't load testef3.slf"	 	:(end)
+loads_ok
+	terminal = testef3(100, 1000.0, "ABCD")
+end

@@ -1,0 +1,14 @@
+* (c) COPYRIGHT 1985, 1994 - CATSPAW, INCORPORATED
+* ALL RIGHTS RESERVED.
+* USE OF THIS SOURCE CODE IS GOVERNED BY A BSD-STYLE
+* LICENSE THAT CAN BE FOUND IN THE LICENSE FILE.
+
+* Test integer return from external function.
+*
+* Should write 101 to terminal.
+*
+	load("testef2(integer,real,string)")		:s(loads_ok)
+	terminal = "Can't load testef2.slf"	 	:(end)
+loads_ok
+	terminal = testef2(100, 1000.0, "ABCD")
+end
